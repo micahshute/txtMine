@@ -4,7 +4,7 @@
 class TxtMine::Functions
 
     ##
-    # Destructively insertion sorts in inputted collection. 
+    # Destructively insertion sorts an inputted collection. 
     # Good for sorting almost-sorted data. Will be faster 
     # Than ruby's built-in `#sort` in those cases
     def self.insertion_sort!(coll)
