@@ -1,0 +1,3 @@
+module TxtMine::Strategy
+
+end
