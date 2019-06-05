@@ -82,7 +82,8 @@ class TxtMine::Tolkenizer
   # delimeter:: DelimeterStrategy (must have #delimit which accepts a string, outputs an array of strings)
   # stop_words:: array of strings, downcase: boolean
   def initialize(text: ,delimeter: TxtMine::Strategy::PunctuationDelimeter, stop_words: STOP_WORDS, downcase: true, doc_id: self.class.get_next_doc_id)
-    @text, @delimeter, @stop_words, @downcase = text, delimeter, stop_words, downcase
+    @text, @delimeter, @stop_words, @downcase, @doc_id = text, delimeter, stop_words, downcase, doc_id
+    @delimited, @cased, @filtered = false, false, false
     self.class.next_doc_id = doc_id + 1 if doc_id != @@next_doc_id - 1
 
   end
@@ -90,31 +91,42 @@ class TxtMine::Tolkenizer
   ##
   # Processes @text via delimiting it, removing stop words, and downcasing it based off of the value of @downcase
   def process
-    self.delimit_text
-    self.case_text
-    self.filter_text
+    self.delimit_text unless @delimited
+    self.case_text unless @cased
+    self.filter_text unless @filtered
     return TolkenizedDocument.new(TxtMine::Functions.freq_count(@text), @doc_id)
   end
 
   ##
   # Requires no input argument, delimits the @text 
   def delimit_text
+    @delimited = true
     @text = delimeter.delimit(@text)
   end
 
   ##
   # Downcase text if @downcase is true, otherwise do nothing
   def case_text
-    @text = @downcase ? @text.downcase : @text
+    @cased = true
+    if @text.is_a?(String)
+      @text = @downcase ? @text.downcase : @text
+    elsif @text.is_a?(Array)
+      @text = @downcase ? @text.map(&:downcase) : @text
+    else
+      raise new Error.new("@text must be a string or an Array")
+    end
   end
 
   # remove stopwords from text. Will work if @text is an array or a string
   def filter_text
     raise Error.new('Text must be delimted before it is filtered') unless @text.is_a?(Array)
+    @filtered = true
     @text = @text.select{ |word| !@stop_words.include?(word) }
   end
 
 
+  ## 
+  # The return object of the #process method will be an instnace of TolkenizedDocument
   class TolkenizedDocument
 
     attr_reader :index, :doc_id
