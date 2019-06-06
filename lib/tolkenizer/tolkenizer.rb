@@ -49,7 +49,7 @@ class TxtMine::Tolkenizer
   # return the next document ID number 
   # as just one higher than the last element in the array (assuming the array is sorted)
   def self.get_next_doc_id(use_next_id = true)
-    if use_next_id
+    if !use_next_id || @@doc_ids.length > 0
       if @@doc_ids.length == 0 
         @@doc_ids << 1
         return 1
@@ -65,9 +65,9 @@ class TxtMine::Tolkenizer
 
   ##
   # Allows to create and process a document in one step. Will not return the tolkenizer instnace but instead the return of `process`
-  def self.create_and_process(text: ,delimeter: TxtMine::Strategy::PunctuationDelimeter, stop_words: STOP_WORDS, downcase: true, doc_id: self.class.get_next_doc_id)
-    tolkenizer = self.new(text: text, delimeter: delimiter, stop_words: stop_words, downcase: downcase, doc_id: doc_id)
-    return tolkenzier.process
+  def self.create_and_process(text: ,delimeter: TxtMine::Strategy::PunctuationDelimeter, stop_words: STOP_WORDS, downcase: true, doc_id: self.get_next_doc_id)
+    tolkenizer = self.new(text: text, delimeter: delimeter, stop_words: stop_words, downcase: downcase, doc_id: doc_id)
+    return tolkenizer.process
   end
 
 
@@ -83,6 +83,7 @@ class TxtMine::Tolkenizer
   # stop_words:: array of strings, downcase: boolean
   def initialize(text: ,delimeter: TxtMine::Strategy::PunctuationDelimeter, stop_words: STOP_WORDS, downcase: true, doc_id: self.class.get_next_doc_id)
     @text, @delimeter, @stop_words, @downcase, @doc_id = text, delimeter, stop_words, downcase, doc_id
+    @stop_words ||= []
     @delimited, @cased, @filtered = false, false, false
     self.class.next_doc_id = doc_id + 1 if doc_id != @@next_doc_id - 1
 

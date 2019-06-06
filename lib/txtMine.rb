@@ -1,5 +1,8 @@
 require "txtMine/version"
 
+require 'bundler/setup'
+Bundler.require(:default)
+
 module TxtMine
   class Error < StandardError; end
   # Your code goes here...

@@ -9,13 +9,21 @@ RSpec.describe TxtMine::Tolkenizer do
   end
 
   it "keeps track of document ids and returns a unique one for each tolkenized document" do
-    expect(false).to eq(true)
+
+    tarr = Array.new(10, sample_text)
+    doc_ids = tarr.map{ |t| TxtMine::Tolkenizer.create_and_process(text: t).doc_id }
+    expect(doc_ids).to eq((1..10).to_a)
+    
   end
 
   describe ".create_and_process" do
 
     it "can instantiate a tolkenizer and process the text all in one step" do
-      expect(false).to eq(true)
+      t1 = TxtMine::Tolkenizer.new(text: sample_text)
+      tdoc1 = t1.process
+      tdoc2 = TxtMine::Tolkenizer.create_and_process(text: sample_text)
+      expect(tdoc1.index).to eq(tdoc2.index)
+      expect(tdoc1.doc_id).to eq(tdoc2.doc_id - 1)
     end
     
   end 
@@ -23,7 +31,25 @@ RSpec.describe TxtMine::Tolkenizer do
   describe ".get_next_doc_id" do
 
     it "returns the correct document id regardless of whether you are tracking all docs or just the next one" do
-      expect(false).to eq(true)
+      TxtMine::Tolkenizer.next_doc_id = 1
+      TxtMine::Tolkenizer.populate_doc_ids([])
+
+      5.times do 
+        t = TxtMine::Tolkenizer.create_and_process(text: sample_text)
+      end
+
+      expect(TxtMine::Tolkenizer.class_variable_get("@@next_doc_id")).to eq(6)
+      expect(TxtMine::Tolkenizer.class_variable_get("@@doc_ids")).to eq([])
+
+      TxtMine::Tolkenizer.next_doc_id = 1
+      TxtMine::Tolkenizer.populate_doc_ids((1..5).to_a)
+
+      5.times do
+        t = TxtMine::Tolkenizer.create_and_process(text: sample_text)
+      end
+      expect(TxtMine::Tolkenizer.class_variable_get("@@next_doc_id")).to eq(11)
+      expect(TxtMine::Tolkenizer.class_variable_get("@@doc_ids")).to eq((1..10).to_a)
+      expect(TxtMine::Tolkenizer.get_next_doc_id).to eq(11)
     end
     
   end
@@ -73,19 +99,45 @@ RSpec.describe TxtMine::Tolkenizer do
       expect(t.text.length).to eq(0)
 
     end
+
+    it "will not filter stop words if initialized with no stop words" do 
+      words = STOP_WORDS.join(" ")
+      t = TxtMine::Tolkenizer.new(text: words, stop_words: nil)
+      t.delimit_text
+      t.case_text
+      t.filter_text
+      expect(t.text.length).to eq(STOP_WORDS.length)
+    end
   end
 
 
   describe "#process" do
-    it "can delimit, downcase, and filter text via the #process method." do
-      expect(false).to eq(true)
+    it "can delimit, case, and filter text via the #process method." do
+      t = TxtMine::Tolkenizer.new(text: sample_text)
+      t.process
+      t2 = TxtMine::Tolkenizer.new(text: sample_text)
+      t2.delimit_text
+      t2.case_text
+      t2.filter_text
+      expect(t.text).to eq(t2.text)
     end
 
     it "returns a TolkenizedDocument instance" do
-      expect(false).to eq(true)
+      t = TxtMine::Tolkenizer.new(text: sample_text)
+      expect(t.process.class).to be(TxtMine::Tolkenizer::TolkenizedDocument)
     end
+
+    it "returns a frequency hash of the word bag" do
+      t = TxtMine::Tolkenizer.new(text: sample_text, stop_words: nil)
+      tdoc = t.process
+      freq_hash = {}
+      for word in TxtMine::Strategy::PunctuationDelimeter.delimit(sample_text).map(&:downcase)
+        freq_hash[word] ||= 0
+        freq_hash[word] += 1
+      end
+      expect(tdoc.index).to eq(freq_hash)
+    end
+
   end
-
-
   
 end
