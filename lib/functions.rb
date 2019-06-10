@@ -7,13 +7,25 @@ class TxtMine::Functions
 	# Destructively insertion sorts an inputted collection. 
 	# Good for sorting almost-sorted data. Will be faster 
 	# Than ruby's built-in `#sort` in those cases
+	# If a block is given, two parameters |a,b| are handed to you.
+	# Return true if a should be to the right of key when ordering
+	# your sorted array from left to right.
+	# IE for a sorted array, if a is 5 and b is 2, 
+	# return a > b which is 5 > 2 (ie true) 
 	def self.insertion_sort!(coll)
 		for j in 1...coll.length do
 			key = coll[j]
 			i = j-1
-			while i >= 0 && coll[i] > key
+			if block_given?
+				while i >= 0 && yield(coll[i], key) # Return true when col[i] > key
 					coll[i+1] = coll[i]
 					i -= 1
+				end
+			else
+				while i >= 0 && coll[i] > key
+						coll[i+1] = coll[i]
+						i -= 1
+				end
 			end
 			coll[i+1] = key
 		end
@@ -64,6 +76,13 @@ class TxtMine::Functions
 		merged_arr.concat left[i, left.length] if j == right.length
 		#puts merged_arr.to_s
 		merged_arr
+	end
+
+
+	##
+	# Find the mean of an input array fo numbers
+	def self.mean(col)
+		col.reduce(&:+) / col.length.to_f
 	end
 
 end

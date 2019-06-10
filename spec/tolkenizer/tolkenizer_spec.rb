@@ -138,6 +138,10 @@ RSpec.describe TxtMine::Tolkenizer do
       expect(tdoc.index).to eq(freq_hash)
     end
 
+    it "returns the document length" do
+      t = TxtMine::Tolkenizer.create_and_process(text: sample_text, stop_words: nil)
+      expect(t.doc_len).to eq(TxtMine::Strategy::PunctuationDelimeter.delimit(sample_text).length)
+    end
   end
   
 end

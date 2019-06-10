@@ -130,10 +130,11 @@ class TxtMine::Tolkenizer
   # The return object of the #process method will be an instnace of TolkenizedDocument
   class TolkenizedDocument
 
-    attr_reader :index, :doc_id
+    attr_reader :index, :doc_id, :doc_len
 
     def initialize(index, doc_id)
       @index, @doc_id = index, doc_id
+      @doc_len = index.reduce(0){ |memo, (word, freq)| memo + freq}
     end
 
   end
