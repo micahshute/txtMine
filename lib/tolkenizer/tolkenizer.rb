@@ -114,7 +114,7 @@ class TxtMine::Tolkenizer
     elsif @text.is_a?(Array)
       @text = @downcase ? @text.map(&:downcase) : @text
     else
-      raise new Error.new("@text must be a string or an Array")
+      raise Error.new("@text must be a string or an Array")
     end
   end
 
